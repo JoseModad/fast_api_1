@@ -4,7 +4,8 @@ from enum import Enum
 
 # Pydantic
 from pydantic import BaseModel
-from pydantic import Field
+from pydantic import Field, EmailStr
+from pydantic import AnyUrl
 
 # FastAPI
 from fastapi import FastAPI
@@ -26,10 +27,31 @@ class HairColor(Enum):
     
 
 class Location(BaseModel):
-    city : str
-    state : str
-    country : str 
+    city : str = Field(
+        ..., 
+        min_length = 1, 
+        max_length = 30
+        )
+    state : str = Field(
+        ..., 
+        min_length = 1, 
+        max_length = 30
+        )
+    country : str = Field(
+        ..., 
+        min_length = 1, 
+        max_length = 30
+        )
     
+    class Config:
+        schema_extra = {
+            'example': {                
+                'city': 'Capital',
+                'state': 'Salta',
+                'country': 'Argentina'
+            }
+        }
+        
     
 
 class Person(BaseModel):
@@ -50,7 +72,21 @@ class Person(BaseModel):
     )
     hair_color: Optional[HairColor] = Field(default = None)
     is_married: Optional[bool] = Field(default = None)
+    email: Optional[EmailStr] = Field(default = None)
+    url_cliente: Optional[AnyUrl] = Field(default = None)
     
+    class Config:
+        schema_extra = {
+            'example': {                
+                'first_name': 'Erika',
+                'last_name': 'Alvarez',
+                'age': 17,
+                'hair_color': 'brown',
+                'is_married': False,
+                'email': 'turko@gmail.com',
+                'url_client': 'https://platzi.com'
+            }
+        }
 
 
 @app.get('/')
@@ -116,3 +152,4 @@ def update_person(
     result.update(dict(location))
 
     return result
+    
