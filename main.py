@@ -5,7 +5,7 @@ from enum import Enum
 # Pydantic
 from pydantic import BaseModel
 from pydantic import Field, EmailStr
-from pydantic import AnyUrl
+from pydantic import AnyUrl, SecretStr
 
 # FastAPI
 from fastapi import FastAPI
@@ -70,10 +70,17 @@ class Person(BaseModel):
         gt = 0,
         le = 115        
     )
-    hair_color: Optional[HairColor] = Field(default = None)
-    is_married: Optional[bool] = Field(default = None)
-    email: Optional[EmailStr] = Field(default = None)
-    url_cliente: Optional[AnyUrl] = Field(default = None)
+    password: str = Field(
+        ..., 
+        min_length = 8,
+        max_length = 10
+    ) 
+       
+    hair_color : Optional[HairColor] = Field(default = None)
+    is_married : Optional[bool] = Field(default = None)
+    email : Optional[EmailStr] = Field(default = None)
+    url_cliente : Optional[AnyUrl] = Field(default = None)
+    
     
     class Config:
         schema_extra = {
@@ -81,12 +88,37 @@ class Person(BaseModel):
                 'first_name': 'Erika',
                 'last_name': 'Alvarez',
                 'age': 17,
-                'hair_color': 'brown',
+                'password': 'josejose12',                
+                'hair_color': 'brown',                
                 'is_married': False,
                 'email': 'turko@gmail.com',
                 'url_client': 'https://platzi.com'
+                
             }
         }
+
+
+class PersonOut(BaseModel):
+    first_name: str = Field(
+        ..., 
+        min_length = 1, 
+        max_length = 50
+        )
+    last_name: str = Field(
+        ..., 
+        min_length = 1, 
+        max_length = 50
+        )
+    age: int = Field(
+        ...,
+        gt = 0,
+        le = 115        
+    )       
+    hair_color : Optional[HairColor] = Field(default = None)
+    is_married : Optional[bool] = Field(default = None)
+    email : Optional[EmailStr] = Field(default = None)
+    url_cliente : Optional[AnyUrl] = Field(default = None)
+        
 
 
 @app.get('/')
@@ -96,7 +128,7 @@ def home():
 
 # Request and Response Body
 
-@app.post('/person/new')
+@app.post('/person/new', response_model = PersonOut)
 def create_person(person: Person = Body(...)):
     return person
 
@@ -141,14 +173,14 @@ def show_person(
 
 # Validations: Request Body
 
-@app.put('/person/{person_id}')
+@app.put('/person/{person_id}', response_model = PersonOut)
 def update_person(
     person_id: int = Path(
         ...,
         title = 'Person ID',
         description = 'This is the person ID',
         gt = 0,
-        example = 23
+        example = 24
         ),
     person: Person = Body(...,),
     location: Location = Body(...)
