@@ -5,12 +5,12 @@ from enum import Enum
 # Pydantic
 from pydantic import BaseModel
 from pydantic import Field, EmailStr
-from pydantic import AnyUrl, SecretStr
+from pydantic import AnyUrl
 
 # FastAPI
 from fastapi import FastAPI
 from fastapi import status
-from fastapi import Body, Query, Path,Form
+from fastapi import Body, Query, Path, Form, Header, Cookie
 
 
 
@@ -127,6 +127,7 @@ def home():
 
 # Request and Response Body
 
+
 @app.post(
     path='/person/new', 
     response_model = PersonOut,
@@ -165,7 +166,8 @@ def show_person(
 
 
 
-# Validations Path Parameter
+# Validations: Path Parameter
+
 
 @app.get(
     path = '/person/detail/{person_id}',
@@ -185,6 +187,7 @@ def show_person(
 
 
 # Validations: Request Body
+
 
 @app.put(
     path = '/person/{person_id}', 
@@ -208,6 +211,10 @@ def update_person(
     return result 
 
 
+
+# Validations: Forms
+
+
 @app.post(
     path = '/login',
     response_model = LoginOut,
@@ -217,3 +224,37 @@ def login(
     username: str = Form(...), 
     password: str = Form(...)):
     return LoginOut(username = username)
+
+
+
+# Cookies and Headers Parameters
+
+@app.post(
+    path = '/contact',
+    status_code = status.HTTP_200_OK
+)
+def contact(
+    first_name: str = Form(
+        ...,
+        max_length = 20,
+        min_length = 1
+    ),
+    last_name: str = Form(
+        ...,
+        max_length = 20,
+        min_length = 1
+    ),
+    email: EmailStr = Form(...),
+    message: str = Form(
+        ...,
+        max_length = 200,
+        min_length = 20
+    ),
+    user_agent: Optional[str] = Header(default = None),
+    ads: Optional[str] = Cookie(default = None)
+):
+    return user_agent
+
+
+
+
