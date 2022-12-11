@@ -117,12 +117,22 @@ class LoginOut(BaseModel):
 
 
 
+# home
+
+
 @app.get(
     path = '/', 
     status_code = status.HTTP_200_OK,
     tags = ['Home']
     )
 def home():
+    """
+    Home page of the API
+
+    This path returns the home page of the API.
+
+    No parameters are required.
+    """
     return {'Hello': 'World'}
 
 
@@ -134,9 +144,21 @@ def home():
     path='/person/new', 
     response_model = PersonOut,
     status_code = status.HTTP_201_CREATED,
-    tags = ['Persons']        
+    tags = ['Persons'],
+    summary = 'Create person in the app'      
     )
 def create_person(person: Person = Body(...)):
+    '''
+    Create Person
+    
+    This path operation creates a person in the app and save the information in the database
+    
+    Parameters:
+    - Request body parameter:
+        -**person: Person** -> A person model with first name, last name, age, hair color, marital status, email, url client and password.
+    
+    -Returns a person model with first name, last name, age, hair color, marital status, email and url client.
+    '''
     return person
 
 
@@ -166,6 +188,18 @@ def show_person(
         
         )
 ):
+    '''
+    Show Person
+
+    This path operation shows the person's name and age in the app from the database.
+
+    Parameters:
+    - Query parameter:
+        - **name: str** -> This is the person name. It's between 1 and 50 characters.
+        - **age: int** -> This is the person age. It's required.
+
+    Returns a JSON with the person's name and age.
+    '''
     return {name: age}
 
 
@@ -189,6 +223,17 @@ def show_person(
         example = 3
         )
 ):
+    '''
+    Show Person
+
+    This path operation shows the person's ID in the app from the database.
+
+    Parameters:
+    - Path parameter:
+        - **person_id: int** -> This is the person ID. It's required and must be greater than 0.
+
+    Returns a JSON with the person's ID.
+    '''
     if person_id not in persons:
         raise HTTPException(
             status_code = status.HTTP_404_NOT_FOUND,
@@ -218,10 +263,24 @@ def update_person(
     person: Person = Body(...,),
     location: Location = Body(...)
 ):
-    result = dict(person)
+    '''
+    Update person
+    
+    This path operation inherits all its attributes from the person class and allows the client to update its city, state and country information.
+    
+    Parameters:
+    -Request body parameter:
+        -**Person id** -> mandatory parameter.
+        -**City** -> mandatory parameter.
+        -**State** -> mandatory parameter.
+        -**Country** -> mandatory parameter.                
+        
+    -Returns a JSON with person's model with first name, last name, age, hair color, marital status, email, url client, city, state and country.
+    '''
+    result = dict(person)    
     result.update(dict(location))
 
-    return result 
+    return result
 
 
 
@@ -237,6 +296,18 @@ def update_person(
 def login(
     username: str = Form(...), 
     password: str = Form(...)):
+    '''
+    Login
+    
+    This path operation allow to client sign in the app. The database will validate if the username and password are correct.
+    
+    Parameters:
+    -Request body parameter:
+        -**username** -> mandatory parameter.
+        -**password** -> mandatory parameter.
+        
+    -Returns a JSON with username.
+    '''
     return LoginOut(username = username)
 
 
@@ -268,6 +339,23 @@ def contact(
     user_agent: Optional[str] = Header(default = None),
     ads: Optional[str] = Cookie(default = None)
 ):
+    '''
+    Contact
+
+    This path operation allows the user to contact the company.
+
+    Parameters:
+    - user_agent: The browser that the user is using.
+    - ads: The cookies that this website uses.
+    - Request body parameter:
+        - **first_name** -> mandatory parameter.
+        - **last_name:** -> mandatory parameter.
+        - **email:** -> mandatory parameter.
+        - **message: -> mandatory parameter.
+        
+    -Returns: user agent's information.
+        '''
+
     return user_agent
 
 
@@ -276,6 +364,17 @@ def contact(
 
 @app.post(path = '/post-image', tags = ['Post Images'] )
 def post_image(image: UploadFile = File(...)):
+    '''
+    Post image
+
+    This path operation allows you to post an image in the app to the database.
+
+    Parameters:
+    - Request body parameter:
+        - **image** -> This is the file to upload. It's required.
+
+    Returns a JSON with the file's name, format and size in kb.
+    '''
     return{
         'Filename': image.filename,
         'Format': image.content_type,
